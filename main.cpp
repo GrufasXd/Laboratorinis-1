@@ -8,31 +8,27 @@ using namespace std;
 struct studentas {
     string vardas;
     string pavarde;
-    int nd[100];
+    int *nd;
     int egzas;
 };
 
-void spausdint(studentas students[], int& studsk, double galrez[], double median[])
-{
-    cout << "Pavarde" << "  " << "Vardas" << "  " << "Galutinis (Vid. ) / Galutinis (Med. )"<< endl;
+void spausdint(studentas students[], int& studsk, double galrez[], double median[]) {
+    cout << "Pavarde" << "  " << "Vardas" << "  " << "Galutinis (Vid. ) / Galutinis (Med. )" << endl;
     cout << "..................................................................." << endl;
-    cout << fixed << setprecision(2); // Set precision to 2 decimal places
+    cout << fixed << setprecision(2);
 
     for (int j = 0; j < studsk; j++) {
-        cout << students[j].pavarde << "          " << students[j].vardas << "                " << galrez[j] << "                "  << median[j] << endl;
+        cout << students[j].pavarde << "          " << students[j].vardas << "                " << galrez[j] << "                " << median[j] << endl;
     }
 }
 
-int main()
-{
+int main() {
     int studsk;
-    studentas students[100];
-    double galrez[100];
-    double median[100];
-
     cout << "Iveskite studentu skaiciu: ";
     cin >> studsk;
-
+    studentas *students = new studentas[studsk];
+    double *galrez = new double[studsk];
+    double *median = new double[studsk];
     for (int j = 0; j < studsk; j++) {
         cout << "Iveskite studento varda: ";
         cin >> students[j].vardas;
@@ -43,6 +39,8 @@ int main()
         int n;
         cout << "Iveskite studento pazymiu kieki: ";
         cin >> n;
+
+        students[j].nd = new int[n];
 
         int ndvid = 0;
         for (int i = 0; i < n; i++) {
@@ -67,5 +65,11 @@ int main()
 
     spausdint(students, studsk, galrez, median);
 
+    for (int j = 0; j < studsk; j++) {
+        delete[] students[j].nd;
+    }
+    delete[] students;
+    delete[] galrez;
+    delete[] median;
     return 0;
 }
