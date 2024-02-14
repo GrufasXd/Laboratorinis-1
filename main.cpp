@@ -2,6 +2,8 @@
 #include <iomanip>
 #include <string>
 #include <algorithm>
+#include <cstdlib>
+#include <ctime>
 
 using namespace std;
 
@@ -13,12 +15,13 @@ struct studentas {
 };
 
 void spausdint(studentas students[], int& studsk, double galrez[], double median[]) {
-    cout << "Pavarde" << "  " << "Vardas" << "  " << "Galutinis (Vid. ) / Galutinis (Med. )" << endl;
+    const int ilgis = 20;
+    cout << setw(ilgis) << left << "Pavarde" << " " << setw(ilgis) << left << "Vardas" << "     " << setw(ilgis) << left <<"Galutinis (Vid. ) / Galutinis (Med. )" << endl;
     cout << "..................................................................." << endl;
     cout << fixed << setprecision(2);
 
     for (int j = 0; j < studsk; j++) {
-        cout << students[j].pavarde << "          " << students[j].vardas << "                " << galrez[j] << "                " << median[j] << endl;
+        cout << setw(ilgis) << left << students[j].pavarde << " " << setw(ilgis) << left << students[j].vardas << "       " << setw(ilgis) << left << galrez[j] << "      " << setw(ilgis) << left << median[j] << endl;
     }
 }
 
@@ -29,6 +32,10 @@ int main() {
     studentas *students = new studentas[studsk];
     double *galrez = new double[studsk];
     double *median = new double[studsk];
+
+    // Seed the random number generator
+    srand(time(nullptr));
+
     for (int j = 0; j < studsk; j++) {
         cout << "Iveskite studento varda: ";
         cin >> students[j].vardas;
@@ -44,8 +51,7 @@ int main() {
 
         int ndvid = 0;
         for (int i = 0; i < n; i++) {
-            cout << "Iveskite pazymi: ";
-            cin >> students[j].nd[i];
+            students[j].nd[i] = rand() % 10 + 1;
             ndvid += students[j].nd[i];
         }
         sort(students[j].nd, students[j].nd + n);
@@ -57,8 +63,7 @@ int main() {
 
         double vidurkis = (double)ndvid / n;
 
-        cout << "Iveskite egzamino rezultata: ";
-        cin >> students[j].egzas;
+        students[j].egzas = rand() % 10 + 1;
 
         galrez[j] = 0.4 * vidurkis + 0.6 * students[j].egzas;
     }
