@@ -16,7 +16,7 @@ struct studentas {
 
 void spausdint(studentas students[], int& studsk, double galrez[], double median[]) {
     const int ilgis = 20;
-    cout << setw(ilgis) << left << "Pavarde" << " " << setw(ilgis) << left << "Vardas" << "     " << setw(ilgis) << left <<"Galutinis (Vid. ) / Galutinis (Med. )" << endl;
+    cout << setw(ilgis) << left << "Pavarde" << " " << setw(ilgis) << left << "Vardas" << "     " << setw(ilgis) << left << "Galutinis (Vid. ) / Galutinis (Med. )" << endl;
     cout << "..................................................................." << endl;
     cout << fixed << setprecision(2);
 
@@ -25,56 +25,107 @@ void spausdint(studentas students[], int& studsk, double galrez[], double median
     }
 }
 
-int main() {
-    int studsk;
-    cout << "Iveskite studentu skaiciu: ";
-    cin >> studsk;
-    studentas *students = new studentas[studsk];
-    double *galrez = new double[studsk];
-    double *median = new double[studsk];
+string randname() {
+    string randomString;
+    int length = rand() % 20 + 1; // Random length between 1 and 20 characters
+    for (int i = 0; i < length; ++i) {
+        randomString += 'a' + rand() % 26; // Random lowercase letter between 'a' and 'z'
+    }
+    return randomString;
+}
 
-    // Seed the random number generator
+int main() {
     srand(time(nullptr));
 
-    for (int j = 0; j < studsk; j++) {
-        cout << "Iveskite studento varda: ";
-        cin >> students[j].vardas;
+    int studsk = 0; // Initialize student count to zero
+    studentas *students = nullptr;
+    double *galrez = nullptr;
+    double *median = nullptr;
 
-        cout << "Iveskite studento pavarde: ";
-        cin >> students[j].pavarde;
+    int pas;
+    do {
+        cout << "Viska rasyti ranka - 1" << endl << "Generuoti tik pazymius - 2" << endl << "Generuoti ir pazymius ir studentu vardus, pavardes - 3" << endl << "Baigti darba - 4" << endl;
+        cin >> pas;
 
-        int n;
-        cout << "Iveskite studento pazymiu kieki: ";
-        cin >> n;
+        if (pas == 1 || pas == 2 || pas == 3) {
+            // Increase the size of arrays to accommodate new student
+            studentas *temp_students = new studentas[studsk + 1];
+            double *temp_galrez = new double[studsk + 1];
+            double *temp_median = new double[studsk + 1];
 
-        students[j].nd = new int[n];
+            // Copy existing data to temporary arrays
+            for (int j = 0; j < studsk; ++j) {
+                temp_students[j] = students[j];
+                temp_galrez[j] = galrez[j];
+                temp_median[j] = median[j];
+            }
 
-        int ndvid = 0;
-        for (int i = 0; i < n; i++) {
-            students[j].nd[i] = rand() % 10 + 1;
-            ndvid += students[j].nd[i];
+            // Delete old arrays
+            delete[] students;
+            delete[] galrez;
+            delete[] median;
+
+            // Point old arrays to new ones
+            students = temp_students;
+            galrez = temp_galrez;
+            median = temp_median;
+
+            if (pas == 3) {
+                // Generate random name and last name
+                students[studsk].vardas = randname();
+                students[studsk].pavarde = randname();
+            } else {
+                cout << "Iveskite studento varda: ";
+                cin >> students[studsk].vardas;
+
+                cout << "Iveskite studento pavarde: ";
+                cin >> students[studsk].pavarde;
+            }
+
+            int n;
+            cout << "Iveskite studento pazymiu kieki: ";
+            cin >> n;
+
+            students[studsk].nd = new int[n];
+
+            int ndvid = 0;
+            for (int i = 0; i < n; i++) {
+                if (pas == 2 || pas == 3)
+                    students[studsk].nd[i] = rand() % 10 + 1;
+                else {
+                    cout << "Iveskite pazymi: ";
+                    cin >> students[studsk].nd[i];
+                }
+                ndvid += students[studsk].nd[i];
+            }
+            sort(students[studsk].nd, students[studsk].nd + n);
+            if (n % 2 == 0) {
+                median[studsk] = (students[studsk].nd[n / 2 - 1] + students[studsk].nd[n / 2]) / 2.0;
+            } else {
+                median[studsk] = students[studsk].nd[n / 2];
+            }
+
+            double vidurkis = (double)ndvid / n;
+
+                cout << "Iveskite egzamino rezultata: ";
+                cin >> students[studsk].egzas;
+
+            galrez[studsk] = 0.4 * vidurkis + 0.6 * students[studsk].egzas;
+
+            // Increment student count
+            studsk++;
         }
-        sort(students[j].nd, students[j].nd + n);
-        if (n % 2 == 0) {
-            median[j] = (students[j].nd[n / 2 - 1] + students[j].nd[n / 2]) / 2.0;
-        } else {
-            median[j] = students[j].nd[n / 2];
-        }
-
-        double vidurkis = (double)ndvid / n;
-
-        students[j].egzas = rand() % 10 + 1;
-
-        galrez[j] = 0.4 * vidurkis + 0.6 * students[j].egzas;
-    }
+    } while (pas != 4);
 
     spausdint(students, studsk, galrez, median);
 
+    // Free memory
     for (int j = 0; j < studsk; j++) {
         delete[] students[j].nd;
     }
     delete[] students;
     delete[] galrez;
     delete[] median;
+
     return 0;
 }
