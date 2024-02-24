@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <fstream>
 
 using namespace std;
 
@@ -14,6 +15,41 @@ struct studentas {
     vector<int> nd;
     int egzas;
 };
+void skaityti(vector<studentas>& students, vector<double>& galrez, vector<double>& median)
+{
+    ifstream inf("kursiokai.txt");
+    string firstline;
+    getline(inf, firstline);
+    studentas tempstud;
+    while(inf >> tempstud.vardas >> tempstud.pavarde)
+    {
+        tempstud.nd.resize(15);
+        for(int j = 0; j<15; j++)
+        {
+            inf >> tempstud.nd[j];
+        }
+        int n = tempstud.nd.size();
+        inf >> tempstud.egzas;
+        int ndvid = 0;
+        for(int i = 0; i<n; i++)
+        {
+            ndvid += tempstud.nd[i];
+        }
+        sort(tempstud.nd.begin(), tempstud.nd.end());
+            if (n % 2 == 0) {
+                median.push_back((tempstud.nd[n / 2 - 1] + tempstud.nd[n / 2]) / 2.0);
+            } else {
+                median.push_back(tempstud.nd[n / 2]);
+            }
+
+            double vidurkis = (double)ndvid / n;
+
+            galrez.push_back(0.4 * vidurkis + 0.6 * tempstud.egzas);
+
+            students.push_back(tempstud);
+    }
+    inf.close();
+}
 
 void spausdint(const vector<studentas>& students, const vector<double>& galrez, const vector<double>& median) {
     const int ilgis = 20;
@@ -86,12 +122,8 @@ int main() {
 
             double vidurkis = (double)ndvid / n;
 
-            if (pas == 2 || pas == 3)
-                temp_student.egzas = rand() % 10 + 1;
-            else {
                 cout << "Iveskite egzamino rezultata: ";
                 cin >> temp_student.egzas;
-            }
 
             galrez.push_back(0.4 * vidurkis + 0.6 * temp_student.egzas);
 
