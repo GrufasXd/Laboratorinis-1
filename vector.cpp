@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <fstream>
+#include <numeric>
 
 using namespace std;
 
@@ -15,50 +16,95 @@ struct studentas {
     vector<int> nd;
     int egzas;
 };
-void skaityti(vector<studentas>& students, vector<double>& galrez, vector<double>& median)
-{
+bool compareNames(const string& a, const string& b) {
+    string numA, numB;
+
+    // Extract numeric part from the names in string 'a'
+    for (char c : a) {
+        if (isdigit(c)) {
+            numA += c; // Append the digit character to numA
+        }
+    }
+
+    // Extract numeric part from the names in string 'b'
+    for (char c : b) {
+        if (isdigit(c)) {
+            numB += c; // Append the digit character to numB
+        }
+    }
+
+    // Convert extracted numeric parts to integers
+    int intA = stoi(numA);
+    int intB = stoi(numB);
+
+    // Compare the numeric parts
+    return intA > intB;
+}
+void skaityti(vector<studentas>& students, vector<double>& galrez, vector<double>& median) {
     int failas;
     cout << "Is kurio failo skaityti duomenis?" << endl << "10k duomenu - 1" << endl << "100k duomenu - 2" << endl << "1mil duomenu - 3" << endl;
     cin >> failas;
     ifstream inf;
     if (failas == 1)
         inf.open("kursiokai1.txt");
-    if (failas == 2)
+    else if (failas == 2)
         inf.open("kursiokai2.txt");
-    if (failas == 3)
+    else if (failas == 3)
         inf.open("kursiokai3.txt");
+    else {
+        cout << "Neteisingas failo pasirinkimas." << endl;
+        return;
+    }
+
+    if (!inf.is_open()) {
+        cout << "Failo atidaryti nepavyko!" << endl;
+        return;
+    }
+
     string firstline;
-    getline(inf, firstline);
+    getline(inf, firstline); // Skip the header line
+
     studentas tempstud;
-    while(inf >> tempstud.vardas >> tempstud.pavarde)
-    {
-        tempstud.nd.resize(15);
-        for(int j = 0; j<15; j++)
-        {
+    while (inf >> tempstud.vardas >> tempstud.pavarde) {
+        // Dynamically resize the vector based on the number of homework grades read
+        tempstud.nd.clear(); // Clear the vector before resizing
+        int num_grades;
+        if (failas == 1)
+            num_grades = 15;
+        else if (failas == 2)
+            num_grades = 20;
+        else if (failas == 3)
+            num_grades = 7;
+
+        tempstud.nd.resize(num_grades);
+        for (int j = 0; j < num_grades; j++) {
             inf >> tempstud.nd[j];
         }
-        int n = tempstud.nd.size();
+
         inf >> tempstud.egzas;
-        int ndvid = 0;
-        for(int i = 0; i<n; i++)
-        {
-            ndvid += tempstud.nd[i];
-        }
+        
+        // Calculate median and final grade
         sort(tempstud.nd.begin(), tempstud.nd.end());
-            if (n % 2 == 0) {
-                median.push_back((tempstud.nd[n / 2 - 1] + tempstud.nd[n / 2]) / 2.0);
-            } else {
-                median.push_back(tempstud.nd[n / 2]);
-            }
+        double median_value;
+        int n = tempstud.nd.size();
+        if (n % 2 == 0) {
+            median_value = (tempstud.nd[n / 2 - 1] + tempstud.nd[n / 2]) / 2.0;
+        } else {
+            median_value = tempstud.nd[n / 2];
+        }
+        double nd_sum = accumulate(tempstud.nd.begin(), tempstud.nd.end(), 0);
+        double vidurkis = nd_sum / n;
+        double galutinis = 0.4 * vidurkis + 0.6 * tempstud.egzas;
 
-            double vidurkis = (double)ndvid / n;
-
-            galrez.push_back(0.4 * vidurkis + 0.6 * tempstud.egzas);
-
-            students.push_back(tempstud);
+        // Store results in vectors
+        median.push_back(median_value);
+        galrez.push_back(galutinis);
+        students.push_back(tempstud);
     }
+
     inf.close();
 }
+
 
 void spausdint(const vector<studentas>& students, const vector<double>& galrez, const vector<double>& median) {
     const int ilgis = 20;
@@ -166,15 +212,15 @@ int main() {
     skaityti(students, galrez, median);
     cout << "Kaip norite kad butu surusiuoti duomenis?" << endl << "Pagal varda - 1" << endl << "Pagal pavarde - 2" << endl << "Galutini pazymiu vidurki - 3" << endl << "Galutini pagal mediana - 4" << endl;
     cin >> rusis;
+    bool keist;
     if(rusis == 1)
     {
-    bool keist;
     do
     {
         keist = false;
         for(int i = 0; i < students.size()-1; i++)
         {
-            if(students[i].vardas > students[i+1].vardas)
+            if (compareNames(students[i].vardas, students[i + 1].vardas))
             {
             swap(students[i].vardas, students[i+1].vardas);
             swap(students[i].pavarde, students[i+1].pavarde);
@@ -187,13 +233,12 @@ int main() {
     }
     if(rusis == 2)
     {
-    bool keist;
     do
     {
         keist = false;
         for(int i = 0; i < students.size()-1; i++)
         {
-            if(students[i].pavarde > students[i+1].pavarde)
+            if(compareNames(students[i].pavarde, students[i+1].pavarde))
             {
             swap(students[i].pavarde, students[i+1].pavarde);
             swap(galrez[i], galrez[i+1]);
@@ -206,7 +251,6 @@ int main() {
     }
     if(rusis == 3)
     {
-    bool keist;
     do
     {
         keist = false;
@@ -225,7 +269,6 @@ int main() {
     }
     if(rusis == 4)
     {
-    bool keist;
     do
     {
         keist = false;
