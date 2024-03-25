@@ -74,46 +74,6 @@ int readInt(const string& prompt) {
         // Compare the numeric parts
         return intA > intB;
     }
-    void studrus(vector<studentas>& students, vector<double>& galrez, vector<studentas>& vargsai, vector<studentas>& galva, const string& filename)
-    {
-        const int ilgis = 20;
-        ifstream inf(filename);
-        string firstline;
-        getline(inf, firstline);
-        studentas tempstud;
-        while (inf >> tempstud.vardas >> tempstud.pavarde) {
-        tempstud.nd.clear(); // Clear the vector before resizing
-        tempstud.nd.resize(15);
-        for (int j = 0; j < 15; j++) {
-            inf >> tempstud.nd[j];
-        }
-        inf >> tempstud.egzas;
-        double nd_sum = accumulate(tempstud.nd.begin(), tempstud.nd.end(), 0);
-        double vidurkis = nd_sum / 15;
-        double galutinis = 0.4 * vidurkis + 0.6 * tempstud.egzas;
-        if(galutinis < 5)
-            vargsai.push_back(tempstud);
-        else if (galutinis >= 5)
-            galva.push_back(tempstud);
-        }
-        inf.close();
-        ofstream of("vargsai.txt");
-        for (int i = 0; i < vargsai.size(); ++i) {
-        of << setw(ilgis) << left << vargsai[i].vardas << " " << setw(ilgis) << left << vargsai[i].pavarde << " ";
-        for (int j = 0; j < vargsai[i].nd.size(); ++j) {
-        of << setw(ilgis) << left << vargsai[i].nd[j] << " ";
-        }
-        of << setw(ilgis) << left << vargsai[i].egzas << endl;
-        }
-        ofstream oif("galva.txt");
-        for (int i = 0; i < galva.size(); ++i) {
-        oif << setw(ilgis) << left << galva[i].vardas << " " << setw(ilgis) << left << galva[i].pavarde << " ";
-        for (int j = 0; j < galva[i].nd.size(); ++j) {
-        oif << setw(ilgis) << left << galva[i].nd[j] << " ";
-        }
-        oif << setw(ilgis) << left << galva[i].egzas << endl;
-        }
-}
     void skaityti(vector<studentas>& students, vector<double>& galrez, vector<double>& median) {
     int failas;
     cout << "Is kurio failo skaityti duomenis?" << endl << "10k duomenu - 1" << endl << "100k duomenu - 2" << endl << "1mil duomenu - 3" << endl;
@@ -203,98 +163,114 @@ int readInt(const string& prompt) {
         outf.close();
     }
 
-    void rasytiranka(vector<studentas>& students, vector<double>& galrez, vector<double>& median){
-        int pas;
-            try{
-                do {
-                    cout << "Viska rasyti ranka - 1" << endl << "Generuoti tik pazymius - 2" << endl << "Generuoti ir pazymius ir studentu vardus, pavardes - 3" << endl << "Baigti darba - 4" << endl;
-                    cin >> pas;
+void rasytiranka(vector<studentas>& students, vector<double>& galrez, vector<double>& median) {
+    int pas;
+    bool reiksme1 = false;
+    
+    do {
+        try {
+            cout << "Viska rasyti ranka - 1" << endl << "Generuoti tik pazymius - 2" << endl << "Generuoti ir pazymius ir studentu vardus, pavardes - 3" << endl << "Baigti darba - 4" << endl;
+            cin >> pas;
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                throw "Netinkamas ivesties pasirinkimas";
+            }
+            if (pas == 1 || pas == 2 || pas == 3 || pas == 4) {
+                studentas temp_student;
+                reiksme1 = true;
+                if (pas == 3) {
+                    temp_student.vardas = randname();
+                    temp_student.pavarde = randname();
+                } else if (pas == 1 || pas == 2) {
+                    cout << "Iveskite studento varda: ";
+                    cin >> temp_student.vardas;
 
-                    if (pas == 1 || pas == 2 || pas == 3) {
-                        studentas temp_student;
+                    cout << "Iveskite studento pavarde: ";
+                    cin >> temp_student.pavarde;
+                }
 
-                        if (pas == 3) {
-                            temp_student.vardas = randname();
-                            temp_student.pavarde = randname();
-                        } else {
-                            cout << "Iveskite studento varda: ";
-                            cin >> temp_student.vardas;
-
-                            cout << "Iveskite studento pavarde: ";
-                            cin >> temp_student.pavarde;
-                        }
-
-                        int n;
+                if (pas != 4) {
+                    bool reiksme2 = false;
+                    while (!reiksme2) {
                         try {
+                            int n;
                             cout << "Iveskite studento pazymiu kieki: ";
                             cin >> n;
-                            if (cin.fail()) {
-                                cin.clear(); // Clear the error flag
-                                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore invalid input
+                            if (cin.fail() || n <= 0) {
+                                cin.clear();
+                                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                                 throw "Netinkamas ivesties pasirinkimas";
                             }
-                        } catch (const char* msg) {
-                            cerr << msg << endl;
-                            return;
-                        }
+                            reiksme2 = true;
+                            temp_student.nd.resize(n);
 
-                        temp_student.nd.resize(n);
+                            int ndvid = 0;
+                            for (int i = 0; i < n; i++) {
+                                bool reiksme3 = false;
+                                while (!reiksme3) {
+                                    try {
+                                        if (pas == 2 || pas == 3)
+                                            temp_student.nd[i] = rand() % 10 + 1;
+                                        else {
+                                            cout << "Iveskite pazymi: ";
+                                            cin >> temp_student.nd[i];
+                                            if (cin.fail() || temp_student.nd[i] < 0 || temp_student.nd[i] > 10) {
+                                                cin.clear();
+                                                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                                                throw "Netinkamas ivesties pasirinkimas";
+                                            }
+                                        }
+                                        reiksme3 = true;
+                                    } catch (const char* msg) {
+                                        cerr << msg << endl;
+                                    }
+                                }
+                                ndvid += temp_student.nd[i];
+                            }
+                            sort(temp_student.nd.begin(), temp_student.nd.end());
+                            if (n % 2 == 0) {
+                                median.push_back((temp_student.nd[n / 2 - 1] + temp_student.nd[n / 2]) / 2.0);
+                            } else {
+                                median.push_back(temp_student.nd[n / 2]);
+                            }
 
-                        int ndvid = 0;
-                        for (int i = 0; i < n; i++) {
-                            if (pas == 2 || pas == 3)
-                                temp_student.nd[i] = rand() % 10 + 1;
-                            else {
+                            double vidurkis = (double)ndvid / n;
+
+                            bool reiksme4 = false;
+                            while (!reiksme4) {
                                 try {
-                                    cout << "Iveskite pazymi: ";
-                                    cin >> temp_student.nd[i];
-                                    if (cin.fail()) {
-                                        cin.clear(); // Clear the error flag
-                                        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore invalid input
+                                    cout << "Iveskite egzamino rezultata: ";
+                                    cin >> temp_student.egzas;
+                                    if (cin.fail() || temp_student.egzas < 0 || temp_student.egzas > 10) {
+                                        cin.clear();
+                                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
                                         throw "Netinkamas ivesties pasirinkimas";
                                     }
+                                    reiksme4 = true;
                                 } catch (const char* msg) {
                                     cerr << msg << endl;
-                                    return;
                                 }
-
                             }
-                            ndvid += temp_student.nd[i];
-                        }
-                        sort(temp_student.nd.begin(), temp_student.nd.end());
-                        if (n % 2 == 0) {
-                            median.push_back((temp_student.nd[n / 2 - 1] + temp_student.nd[n / 2]) / 2.0);
-                        } else {
-                            median.push_back(temp_student.nd[n / 2]);
-                        }
 
-                        double vidurkis = (double)ndvid / n;
-                        try {
-                            cout << "Iveskite egzamino rezultata: ";
-                            cin >> temp_student.egzas;
-                            if (cin.fail()) {
-                                cin.clear(); // Clear the error flag
-                                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore invalid input
-                                throw "Netinkamas ivesties pasirinkimas";
-                            }
+                            galrez.push_back(0.4 * vidurkis + 0.6 * temp_student.egzas);
+                            students.push_back(temp_student);
                         } catch (const char* msg) {
                             cerr << msg << endl;
-                            return;
                         }
-
-                        galrez.push_back(0.4 * vidurkis + 0.6 * temp_student.egzas);
-
-                        // Add the temporary student to the vectors
-                        students.push_back(temp_student);
-                    } else if (pas != 4) {
-                        throw "Neteisingas duomenu ivedimo pasirinkimas";
                     }
-                }while (pas != 4);
-                spausdint(students, galrez, median);
-            } catch (const char* msg) {
-        cerr << msg << endl;
-    }
+                }
+            } else {
+                throw "Neteisingas duomenu ivedimo pasirinkimas";
+            }
+        } catch (const char* msg) {
+            cerr << msg << endl;
+            reiksme1 = false;
+        }
+    } while (pas != 4);
+    spausdint(students, galrez, median);
 }
+
     void skaitymas(vector<studentas>& students, vector<double>& galrez, vector<double>& median)
     {
         int rusis;
