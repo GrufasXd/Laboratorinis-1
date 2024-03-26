@@ -343,7 +343,7 @@ void rasytiranka(vector<studentas>& students, vector<double>& galrez, vector<dou
 
     string randname() {
         string randomString;
-        int length = rand() % 20 + 1; // Random length between 1 and 20 characters
+        int length = rand() % 20 + 1;
         for (int i = 0; i < length; ++i) {
             randomString += 'a' + rand() % 26; // Random lowercase letter between 'a' and 'z'
         }
