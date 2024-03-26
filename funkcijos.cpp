@@ -72,65 +72,75 @@ int readInt(const string& prompt) {
     }
     void skaityti(vector<studentas>& students, vector<double>& galrez, vector<double>& median) {
     int failas;
-    cout << "Is kurio failo skaityti duomenis?" << endl << "10k duomenu - 1" << endl << "100k duomenu - 2" << endl << "1mil duomenu - 3" << endl;
-    cin >> failas;
-    ifstream inf;
-    if (failas == 1)
-        inf.open("kursiokai1.txt");
-    else if (failas == 2)
-        inf.open("kursiokai2.txt");
-    else if (failas == 3)
-        inf.open("kursiokai3.txt");
-    else {
-        throw "Neteisingas failo pasirinkimas.";
-    }
+    bool fileSelected = false;
+    while (!fileSelected) {
+        try {
+            cout << "Is kurio failo skaityti duomenis?" << endl
+                 << "10k duomenu - 1" << endl
+                 << "100k duomenu - 2" << endl
+                 << "1mil duomenu - 3" << endl;
+            cin >> failas;
 
-    if (!inf.is_open()) {
-        throw "Failo atidaryti nepavyko!";
-    }
+            ifstream inf;
+            if (failas == 1)
+                inf.open("kursiokai1.txt");
+            else if (failas == 2)
+                inf.open("kursiokai2.txt");
+            else if (failas == 3)
+                inf.open("kursiokai3.txt");
+            else {
+                throw "Neteisingas failo pasirinkimas.";
+            }
 
-    string firstline;
-    getline(inf, firstline);
+            if (!inf.is_open()) {
+                throw "Failo atidaryti nepavyko!";
+            }
+            fileSelected = true;
 
-    studentas tempstud;
-    while (inf >> tempstud.vardas >> tempstud.pavarde) {
-        tempstud.nd.clear(); 
-        int num_grades;
-        if (failas == 1)
-            num_grades = 15;
-        else if (failas == 2)
-            num_grades = 20;
-        else if (failas == 3)
-            num_grades = 7;
+            string firstline;
+            getline(inf, firstline);
 
-        tempstud.nd.resize(num_grades);
-        for (int j = 0; j < num_grades; j++) {
-            inf >> tempstud.nd[j];
+            studentas tempstud;
+            while (inf >> tempstud.vardas >> tempstud.pavarde) {
+                tempstud.nd.clear();
+                int num_grades;
+                if (failas == 1)
+                    num_grades = 15;
+                else if (failas == 2)
+                    num_grades = 20;
+                else if (failas == 3)
+                    num_grades = 7;
+
+                tempstud.nd.resize(num_grades);
+                for (int j = 0; j < num_grades; j++) {
+                    inf >> tempstud.nd[j];
+                }
+
+                inf >> tempstud.egzas;
+                sort(tempstud.nd.begin(), tempstud.nd.end());
+                double median_value;
+                int n = tempstud.nd.size();
+                if (n % 2 == 0) {
+                    median_value = (tempstud.nd[n / 2 - 1] + tempstud.nd[n / 2]) / 2.0;
+                } else {
+                    median_value = tempstud.nd[n / 2];
+                }
+                double nd_sum = accumulate(tempstud.nd.begin(), tempstud.nd.end(), 0.0);
+                double vidurkis = nd_sum / n;
+                double galutinis = 0.4 * vidurkis + 0.6 * tempstud.egzas;
+                median.push_back(median_value);
+                galrez.push_back(galutinis);
+                students.push_back(tempstud);
+            }
+
+            inf.close();
+        } catch (const char* msg) {
+            cerr << msg << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
-
-        inf >> tempstud.egzas;
-
-        sort(tempstud.nd.begin(), tempstud.nd.end());
-        double median_value;
-        int n = tempstud.nd.size();
-        if (n % 2 == 0) {
-            median_value = (tempstud.nd[n / 2 - 1] + tempstud.nd[n / 2]) / 2.0;
-        } else {
-            median_value = tempstud.nd[n / 2];
-        }
-        double nd_sum = accumulate(tempstud.nd.begin(), tempstud.nd.end(), 0);
-        double vidurkis = nd_sum / n;
-        double galutinis = 0.4 * vidurkis + 0.6 * tempstud.egzas;
-
-        median.push_back(median_value);
-        galrez.push_back(galutinis);
-        students.push_back(tempstud);
     }
-
-    inf.close();
 }
-
-
     void spausdint(const vector<studentas>& students, const vector<double>& galrez, const vector<double>& median) {
         const int ilgis = 20;
         cout << setw(ilgis) << left << "Pavarde" << " " << setw(ilgis) << left << "Vardas" << "     " << setw(ilgis) << left << "Galutinis (Vid. ) / Galutinis (Med. )" << endl;
@@ -267,12 +277,14 @@ void rasytiranka(vector<studentas>& students, vector<double>& galrez, vector<dou
     void skaitymas(vector<studentas>& students, vector<double>& galrez, vector<double>& median)
     {
         int rusis;
+        bool nominalas = false;
         try {
               skaityti(students, galrez, median);
             } catch (const char* msg) {
                 cerr << msg << endl;
                 exit(1);
             }
+            while(!nominalas){
             try {
                 cout << "Kaip norite kad butu surusiuoti duomenis?" << endl << "Pagal varda - 1" << endl << "Pagal pavarde - 2" << endl << "Galutini pazymiu vidurki - 3" << endl << "Galutini pagal mediana - 4" << endl;
                 cin >> rusis;
@@ -335,11 +347,14 @@ void rasytiranka(vector<studentas>& students, vector<double>& galrez, vector<dou
                 } else {
                     throw "Neteisingas rusiavimo pasirinkimas";
                 }
+                nominalas = true;
             } catch (const char* msg) {
                 cerr << msg << endl;
-                exit(1);
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
             }
     }
+}
 
     string randname() {
         string randomString;
