@@ -9,28 +9,6 @@
 
     using namespace std;
 
-void createfile(const string& filename, const int& kiekis) {
-    ofstream inf(filename);
-
-    const int ilgis = 20;
-    inf << setw(ilgis) << left << "Vardas" << " " << setw(ilgis) << left << "Pavarde" << "     ";
-    for (int i = 1; i < 16; i++) {
-        inf << setw(10) << left << "ND" + to_string(i);
-    }
-    inf << setw(10) << left << "Egz." << endl;
-
-    for (int j = 1; j < kiekis+1; j++) {
-        inf << setw(ilgis) << left << "Vardas" + to_string(j) << " " << setw(ilgis) << left << "Pavarde" + to_string(j) << "     ";
-        for (int i = 0; i < 15; i++) {
-            inf << setw(10) << left << rand() % 10 + 1;
-        }
-        inf << setw(10) << left << rand() % 10 + 1 << endl;
-    }
-
-    inf.close();
-}
-
-
 bool isNumeric(const string& str) {
     for (char c : str) {
         if (!isdigit(c)) {
