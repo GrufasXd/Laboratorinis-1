@@ -40,7 +40,6 @@ bool isNumeric(const string& str) {
     return true;
 }
 
-// Function to read an integer from input
 int readInt(const string& prompt) {
     string input;
     cout << prompt;
@@ -60,18 +59,15 @@ int readInt(const string& prompt) {
             }
         }
 
-        // Extract numeric part from the names in string 'b'
         for (char c : b) {
             if (isdigit(c)) {
-                numB += c; // Append the digit character to numB
+                numB += c;
             }
         }
 
-        // Convert extracted numeric parts to integers
         int intA = stoi(numA);
         int intB = stoi(numB);
 
-        // Compare the numeric parts
         return intA > intB;
     }
     void skaityti(vector<studentas>& students, vector<double>& galrez, vector<double>& median) {
@@ -94,12 +90,11 @@ int readInt(const string& prompt) {
     }
 
     string firstline;
-    getline(inf, firstline); // Skip the header line
+    getline(inf, firstline);
 
     studentas tempstud;
     while (inf >> tempstud.vardas >> tempstud.pavarde) {
-        // Dynamically resize the vector based on the number of homework grades read
-        tempstud.nd.clear(); // Clear the vector before resizing
+        tempstud.nd.clear(); 
         int num_grades;
         if (failas == 1)
             num_grades = 15;
@@ -115,7 +110,6 @@ int readInt(const string& prompt) {
 
         inf >> tempstud.egzas;
 
-        // Calculate median and final grade
         sort(tempstud.nd.begin(), tempstud.nd.end());
         double median_value;
         int n = tempstud.nd.size();
@@ -128,7 +122,6 @@ int readInt(const string& prompt) {
         double vidurkis = nd_sum / n;
         double galutinis = 0.4 * vidurkis + 0.6 * tempstud.egzas;
 
-        // Store results in vectors
         median.push_back(median_value);
         galrez.push_back(galutinis);
         students.push_back(tempstud);
