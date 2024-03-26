@@ -274,85 +274,78 @@ void rasytiranka(vector<studentas>& students, vector<double>& galrez, vector<dou
     spausdint(students, galrez, median);
 }
 
-    void skaitymas(vector<studentas>& students, vector<double>& galrez, vector<double>& median)
-    {
-        int rusis;
-        bool nominalas = false;
+   int partition(vector<studentas>& students, vector<double>& galrez, vector<double>& median, int low, int high, int rusis) {
+    double pivot;
+    if (rusis == 1 || rusis == 2) {
+        pivot = (rusis == 1) ? students[high].vardas.compare(students[high].vardas) : students[high].pavarde.compare(students[high].pavarde);
+    } else if (rusis == 3) {
+        pivot = galrez[high];
+    } else if (rusis == 4) {
+        pivot = median[high];
+    }
+
+    int i = low - 1; // Index of smaller element
+
+    for (int j = low; j <= high - 1; j++) {
+        double compare;
+        if (rusis == 1 || rusis == 2) {
+            compare = (rusis == 1) ? students[j].vardas.compare(students[j].vardas) : students[j].pavarde.compare(students[j].pavarde);
+        } else if (rusis == 3) {
+            compare = galrez[j];
+        } else if (rusis == 4) {
+            compare = median[j];
+        }
+
+        if (compare <= pivot) {
+            i++;
+            swap(students[i], students[j]);
+            swap(galrez[i], galrez[j]);
+            swap(median[i], median[j]);
+        }
+    }
+    swap(students[i + 1], students[high]);
+    swap(galrez[i + 1], galrez[high]);
+    swap(median[i + 1], median[high]);
+    return i + 1;
+}
+void quickSort(vector<studentas>& students, vector<double>& galrez, vector<double>& median, int low, int high, int rusis) {
+    if (low < high) {
+        int pi = partition(students, galrez, median, low, high, rusis);
+
+        quickSort(students, galrez, median, low, pi - 1, rusis);
+        quickSort(students, galrez, median, pi + 1, high, rusis);
+    }
+}
+
+void skaitymas(vector<studentas>& students, vector<double>& galrez, vector<double>& median) {
+    int rusis;
+    bool nominalas = false;
+    try {
+        skaityti(students, galrez, median);
+    } catch (const char* msg) {
+        cerr << msg << endl;
+        exit(1);
+    }
+
+    while (!nominalas) {
         try {
-              skaityti(students, galrez, median);
-            } catch (const char* msg) {
-                cerr << msg << endl;
-                exit(1);
-            }
-            while(!nominalas){
-            try {
-                cout << "Kaip norite kad butu surusiuoti duomenis?" << endl << "Pagal varda - 1" << endl << "Pagal pavarde - 2" << endl << "Galutini pazymiu vidurki - 3" << endl << "Galutini pagal mediana - 4" << endl;
-                cin >> rusis;
-                bool keist;
-                if (rusis == 1) {
-                    do {
-                        keist = false;
-                        for (int i = 0; i < students.size() - 1; i++) {
-                            if (compareNames(students[i].vardas, students[i + 1].vardas)) {
-                                swap(students[i].vardas, students[i + 1].vardas);
-                                swap(students[i].pavarde, students[i + 1].pavarde);
-                                swap(galrez[i], galrez[i + 1]);
-                                swap(median[i], median[i + 1]);
-                                keist = true;
-                            }
-                        }
-                    } while (keist);
-                }
-                else if (rusis == 2) {
-                    do {
-                        keist = false;
-                        for (int i = 0; i < students.size() - 1; i++) {
-                            if (compareNames(students[i].pavarde, students[i + 1].pavarde)) {
-                                swap(students[i].pavarde, students[i + 1].pavarde);
-                                swap(galrez[i], galrez[i + 1]);
-                                swap(median[i], median[i + 1]);
-                                swap(students[i].vardas, students[i + 1].vardas);
-                                keist = true;
-                            }
-                        }
-                    } while (keist);
-                }
-                else if (rusis == 3) {
-                    do {
-                        keist = false;
-                        for (int i = 0; i < students.size() - 1; i++) {
-                            if (galrez[i] > galrez[i + 1]) {
-                                swap(galrez[i], galrez[i + 1]);
-                                swap(median[i], median[i + 1]);
-                                swap(students[i].vardas, students[i + 1].vardas);
-                                swap(students[i].pavarde, students[i + 1].pavarde);
-                                keist = true;
-                            }
-                        }
-                    } while (keist);
-                }
-                else if (rusis == 4) {
-                    do {
-                        keist = false;
-                        for (int i = 0; i < students.size() - 1; i++) {
-                            if (median[i] > median[i + 1]) {
-                                swap(median[i], median[i + 1]);
-                                swap(students[i].vardas, students[i + 1].vardas);
-                                swap(students[i].pavarde, students[i + 1].pavarde);
-                                swap(galrez[i], galrez[i + 1]);
-                                keist = true;
-                            }
-                        }
-                    } while (keist);
-                } else {
-                    throw "Neteisingas rusiavimo pasirinkimas";
-                }
+            cout << "Kaip norite kad butu surusiuoti duomenis?" << endl
+                 << "Pagal varda - 1" << endl
+                 << "Pagal pavarde - 2" << endl
+                 << "Galutini pazymiu vidurki - 3" << endl
+                 << "Galutini pagal mediana - 4" << endl;
+            cin >> rusis;
+            if (rusis >= 1 && rusis <= 4) {
+                quickSort(students, galrez, median, 0, students.size() - 1, rusis);
                 nominalas = true;
-            } catch (const char* msg) {
-                cerr << msg << endl;
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            } else {
+                throw "Neteisingas rusiavimo pasirinkimas";
             }
+        } catch (const char* msg) {
+            cerr << msg << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
     }
 }
 
